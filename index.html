@@ -27,35 +27,39 @@
   vr-mode-ui="enabled: false"
   device-orientation-permission-ui="enabled: false">
 
-  <!-- Предзагрузка модели (ОБЯЗАТЕЛЬНО!) -->
+  <!-- Предзагрузка модели -->
   <a-assets timeout="120000">
-    <a-asset-item id="myModel" src="assets/model.glb"></a-asset-item>
+    <a-asset-item id="myModel" src="assets/model.glb" 
+                  onload="console.log('Model loaded successfully!');" 
+                  onerror="console.error('Failed to load model.glb');"></a-asset-item>
   </a-assets>
 
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-  <!-- Освещение (очень важно для glb!) -->
-  <a-entity light="type: ambient; intensity: 0.8"></a-entity>
-  <a-entity light="type: directional; intensity: 1.2" position="5 10 5"></a-entity>
+  <!-- Освещение — УВЕЛИЧЕНО для PBR (убирает тьму) -->
+  <a-entity light="type: ambient; intensity: 1.0"></a-entity>
+  <a-entity light="type: directional; intensity: 2.0; castShadow: false" position="1 2 1"></a-entity>
+
 
   <!-- Маркер 0 -->
   <a-entity mindar-image-target="targetIndex: 0">
 
-    <!-- ОТЛАДКА: всегда видно, где маркер -->
-    <a-box position="0 0.1 0" depth="0.3" height="0.2" width="0.3" color="#00FF00" opacity="0.7"></a-box>
-    <a-cylinder position="0 0.3 0" radius="0.15" height="0.6" color="#FFFF00"></a-cylinder>
+    <!-- ОТЛАДКА: ЗЕЛЁНЫЙ КУБ — всегда видно над маркером -->
+    <a-box position="0 0.2 0" depth="0.2" height="0.2" width="0.2" color="#00FF00" opacity="0.8"></a-box>
 
-    <!-- Красная плоскость под ногами -->
-    <a-plane position="0 0 0" rotation="-90 0 0" width="1" height="1" color="#FF0000" opacity="0.5"></a-plane>
+    <!-- ОТЛАДКА: ЖЁЛТЫЙ ЦИЛИНДР — указывает вверх -->
+    <a-cylinder position="0 0.4 0" radius="0.1" height="0.4" color="#FFFF00"></a-cylinder>
 
-    <!-- Твоя модель — с правильной ориентацией и масштабом -->
+    <!-- Красная плоскость под маркером -->
+    <a-plane position="0 0 0" rotation="-90 0 0" width="1" height="1" color="#FF0000" opacity="0.6"></a-plane>
+
+    <!-- Твоя модель (утка) — БОЛЬШЕ И БЛИЖЕ -->
     <a-entity
       gltf-model="#myModel"
-      position="0 0.05 0"
+      position="0 0.3 0"
       rotation="-90 0 0"
-      scale="0.3 0.3 0.3"
-      animation-mixer
-      shadow="receive: true; cast: true">
+      scale="0.5 0.5 0.5"
+      animation-mixer>
     </a-entity>
 
   </a-entity>
@@ -74,7 +78,7 @@
         try {
           const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
           await sceneEl.systems["mindar-image-system"].start();
-          hint.textContent = "Наведите на маркер";
+          hint.textContent = "Наведите на маркер — ищите зелёный куб!";
         } catch (e) {
           hint.innerHTML = "Ошибка камеры<br>Разрешите доступ и обновите";
           console.error(e);
@@ -85,12 +89,12 @@
     // События маркера
     const target = document.querySelector("a-entity[mindar-image-target]");
     target.addEventListener("targetFound", () => {
-      console.log("Маркер найден!");
-      hint.textContent = "Модель должна быть видна!";
+      console.log("Маркер найден! Проверьте зелёный куб и модель.");
+      hint.textContent = "✅ Маркер найден! Ищите зелёный куб и утку.";
       hint.style.background = "rgba(0,200,0,0.7)";
     });
     target.addEventListener("targetLost", () => {
-      hint.textContent = "Ищем маркер...";
+      hint.textContent = "🔍 Ищем маркер...";
       hint.style.background = "rgba(0,0,0,0.6)";
     });
   });
